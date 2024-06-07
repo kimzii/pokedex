@@ -67,9 +67,9 @@ const Pokemon: React.FC<PokemonProps> = ({ data }) => {
   };
 
   return (
-    <Card className="w-[360px] p-8">
+    <Card className="w-[360px] p-8 bg-[url('./assets/bg-pokeball.png')] bg-contain bg-no-repeat bg-[length:260px] bg-center">
       <CardHeader>
-        <p className='text-end'>{data.id}</p>
+        <CardTitle className='text-end'>{data.id}</CardTitle>
         <img src={data.sprites.front_default} alt="" className="w-[200px] mx-auto" />
       </CardHeader>
       <CardContent className="flex justify-between">

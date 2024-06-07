@@ -32,6 +32,10 @@ const frameworks = [
     value: "water",
     label: "Water",
   },
+  {
+    value: "poison",
+    label: "Poison",
+  },
 ]
 
 export function Filter() {
