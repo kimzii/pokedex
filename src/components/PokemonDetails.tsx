@@ -1,10 +1,18 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardFooter, CardTitle } from "@/components/ui/card";
 
 interface Type {
   type: {
     name: string;
     url: string;
+  };
+}
+
+
+interface Stats {
+  base_stat:string;
+  stat: {
+    name: string;
   };
 }
 
@@ -15,6 +23,7 @@ interface DataType {
     front_default: string;
   };
   types: Type[];
+  stats: Stats[];
 }
 
 interface PokemonProps {
@@ -66,7 +75,7 @@ const Pokemon: React.FC<PokemonProps> = ({ data }) => {
   };
 
   return (
-    <Card className="w-[360px] p-8 hover:bg-secondary">
+    <Card className="w-[360px] p-8">
       <CardHeader className="bg-[url('./assets/bg-pokeball.png')] bg-contain bg-no-repeat bg-[length:260px] bg-center">
         <p className='text-end font-bold text-2xl'>{data.id}</p>
         <img src={data.sprites.front_default} alt="" className="w-[200px] mx-auto" />
@@ -81,6 +90,18 @@ const Pokemon: React.FC<PokemonProps> = ({ data }) => {
           ))}
         </div>
       </CardContent>
+      <CardFooter className='grid grid-cols-1 text-start'>
+        {data.stats.map(stat => (
+          <div key={stat.stat.name}>
+            <span className="badge rounded px-[6px]">
+              {capitalizeFirstLetter(stat.stat.name)}
+            </span>
+            <span className="badge rounded px-[6px]">
+              {stat.base_stat}
+            </span>
+          </div>
+        ))}
+      </CardFooter>
     </Card>
   );
 };

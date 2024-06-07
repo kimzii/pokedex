@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Pokemon from './components/Pokemon.tsx';
 import Filter from './components/Filter.tsx';
 import { Input } from "@/components/ui/input";
 import { ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Pokemon from './components/Pokemon.tsx';
 
 interface Type {
-  slot: number;
   type: {
     name: string;
     url: string;
@@ -33,7 +32,7 @@ const App: React.FC = () => {
     async function fetchAllPokemon() {
       try {
         const pokemons: DataType[] = [];
-        for (let i = 1; i <= 151; i++) { // Adjust the range as needed
+        for (let i = 1; i <= 10; i++) { // Adjust the range as needed
           const response = await axios.get<DataType>(`https://pokeapi.co/api/v2/pokemon/${i}/`);
           pokemons.push(response.data);
         }
@@ -72,7 +71,7 @@ const App: React.FC = () => {
         <div className='w-[360px]'>
           <Input placeholder='Search Pokemon...'></Input>
         </div>
-        <div className='flex flex-row justify-center gap-[20px] mb-[40px]'>
+        <div className='flex flex-row justify-center gap-[20px]'>
           <Filter onSelectType={handleTypeSelect} />
         </div>
       </div>
