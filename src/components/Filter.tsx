@@ -36,6 +36,58 @@ const frameworks = [
     value: "poison",
     label: "Poison",
   },
+  {
+    value: "normal",
+    label: "Normal",
+  },
+  {
+    value: "flying",
+    label: "Flying",
+  },
+  {
+    value: "ground",
+    label: "Ground",
+  },
+  {
+    value: "rock",
+    label: "Rock",
+  },
+  {
+    value: "psychic",
+    label: "Psychic",
+  },
+  {
+    value: "bug",
+    label: "Bug",
+  },
+  {
+    value: "fairy",
+    label: "Fairy",
+  },
+  {
+    value: "fighting",
+    label: "Fighting",
+  },
+  {
+    value: "electric",
+    label: "Electric",
+  },
+  {
+    value: "steel",
+    label: "Steel",
+  },
+  {
+    value: "ice",
+    label: "Ice",
+  },
+  {
+    value: "ghost",
+    label: "Ghost",
+  },
+  {
+    value: "dragon",
+    label: "Dragon",
+  },
 ]
 
 export function Filter() {
@@ -61,7 +113,7 @@ export function Filter() {
         <Command>
           <CommandInput placeholder="Search..." />
           <CommandList>
-            <CommandEmpty>No framework found.</CommandEmpty>
+            <CommandEmpty>No Type found.</CommandEmpty>
             <CommandGroup>
               {frameworks.map((framework) => (
                 <CommandItem

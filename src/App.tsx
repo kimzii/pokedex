@@ -3,7 +3,8 @@ import axios from 'axios';
 import Pokemon from './components/Pokemon.tsx';
 import Filter from './components/Filter.tsx';
 import { Input } from "@/components/ui/input";
-
+import { ChevronUp } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 
 interface Type {
@@ -47,6 +48,10 @@ const App: React.FC = () => {
     fetchAllPokemon();
   }, []);
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
@@ -64,6 +69,9 @@ const App: React.FC = () => {
           <Pokemon key={pokemon.id} data={pokemon} />
         ))}
       </div>
+      <Button onClick={scrollToTop} className='fixed bottom-0 right-0 m-6 bg-primary' variant="default" size="icon">
+      <ChevronUp  color="white" className="h-4 w-4" />
+      </Button>
     </section>
   );
 };
