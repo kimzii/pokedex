@@ -32,7 +32,7 @@ const App: React.FC = () => {
     async function fetchAllPokemon() {
       try {
         const pokemons: DataType[] = [];
-        for (let i = 1; i <= 10; i++) { // Adjust the range as needed
+        for (let i = 1; i <= 151; i++) { // Adjust the range as needed
           const response = await axios.get<DataType>(`https://pokeapi.co/api/v2/pokemon/${i}/`);
           pokemons.push(response.data);
         }
