@@ -1,10 +1,7 @@
-"use client"
-
-import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
-
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import * as React from "react";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -12,87 +9,37 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const frameworks = [
-  {
-    value: "grass",
-    label: "Grass",
-  },
-  {
-    value: "fire",
-    label: "Fire",
-  },
-  {
-    value: "water",
-    label: "Water",
-  },
-  {
-    value: "poison",
-    label: "Poison",
-  },
-  {
-    value: "normal",
-    label: "Normal",
-  },
-  {
-    value: "flying",
-    label: "Flying",
-  },
-  {
-    value: "ground",
-    label: "Ground",
-  },
-  {
-    value: "rock",
-    label: "Rock",
-  },
-  {
-    value: "psychic",
-    label: "Psychic",
-  },
-  {
-    value: "bug",
-    label: "Bug",
-  },
-  {
-    value: "fairy",
-    label: "Fairy",
-  },
-  {
-    value: "fighting",
-    label: "Fighting",
-  },
-  {
-    value: "electric",
-    label: "Electric",
-  },
-  {
-    value: "steel",
-    label: "Steel",
-  },
-  {
-    value: "ice",
-    label: "Ice",
-  },
-  {
-    value: "ghost",
-    label: "Ghost",
-  },
-  {
-    value: "dragon",
-    label: "Dragon",
-  },
-]
+  { value: "all", label: "All" },
+  { value: "grass", label: "Grass" },
+  { value: "fire", label: "Fire" },
+  { value: "water", label: "Water" },
+  { value: "poison", label: "Poison" },
+  { value: "normal", label: "Normal" },
+  { value: "flying", label: "Flying" },
+  { value: "ground", label: "Ground" },
+  { value: "rock", label: "Rock" },
+  { value: "psychic", label: "Psychic" },
+  { value: "bug", label: "Bug" },
+  { value: "fairy", label: "Fairy" },
+  { value: "fighting", label: "Fighting" },
+  { value: "electric", label: "Electric" },
+  { value: "steel", label: "Steel" },
+  { value: "ice", label: "Ice" },
+  { value: "ghost", label: "Ghost" },
+  { value: "dragon", label: "Dragon" },
+];
 
-export function Filter() {
-  const [open, setOpen] = React.useState(false)
-  const [value, setValue] = React.useState("")
+interface FilterProps {
+  onSelectType: (type: string) => void;
+}
+
+export function Filter({ onSelectType }: FilterProps) {
+  const [open, setOpen] = React.useState(false);
+  const [value, setValue] = React.useState("");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -120,8 +67,9 @@ export function Filter() {
                   key={framework.value}
                   value={framework.value}
                   onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue)
-                    setOpen(false)
+                    setValue(currentValue === value ? "" : currentValue);
+                    onSelectType(currentValue === value ? "" : currentValue);
+                    setOpen(false);
                   }}
                 >
                   <Check
@@ -138,7 +86,7 @@ export function Filter() {
         </Command>
       </PopoverContent>
     </Popover>
-  )
+  );
 }
 
 export default Filter;

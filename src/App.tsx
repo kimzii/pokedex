@@ -3,9 +3,8 @@ import axios from 'axios';
 import Pokemon from './components/Pokemon.tsx';
 import Filter from './components/Filter.tsx';
 import { Input } from "@/components/ui/input";
-import { ChevronUp } from "lucide-react"
-import { Button } from "@/components/ui/button"
-
+import { ChevronUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Type {
   slot: number;
@@ -28,6 +27,7 @@ const App: React.FC = () => {
   const [pokemonList, setPokemonList] = useState<DataType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
+  const [selectedType, setSelectedType] = useState<string>("");
 
   useEffect(() => {
     async function fetchAllPokemon() {
@@ -48,6 +48,16 @@ const App: React.FC = () => {
     fetchAllPokemon();
   }, []);
 
+  const handleTypeSelect = (type: string) => {
+    setSelectedType(type);
+  };
+
+  const filteredData = selectedType && selectedType !== "all"
+    ? pokemonList.filter(pokemon =>
+        pokemon.types.some(t => t.type.name === selectedType)
+      )
+    : pokemonList;
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -58,19 +68,21 @@ const App: React.FC = () => {
   return (
     <section className='flex flex-col text-center bg-secondary py-[40px]'>
       <h4 className='font-semibold text-3xl'>Pokedex</h4>
-      <div className='flex flex-row justify-center gap-[20px] my-[40px] p'>
+      <div className='flex flex-row justify-center gap-[20px] my-[40px]'>
         <div className='w-[360px]'>
           <Input placeholder='Search Pokemon...'></Input>
         </div>
-        <Filter></Filter>
+        <div className='flex flex-row justify-center gap-[20px] mb-[40px]'>
+          <Filter onSelectType={handleTypeSelect} />
+        </div>
       </div>
       <div className="flex flex-wrap gap-[20px] justify-center">
-        {pokemonList.map(pokemon => (
+        {filteredData.map(pokemon => (
           <Pokemon key={pokemon.id} data={pokemon} />
         ))}
       </div>
       <Button onClick={scrollToTop} className='fixed bottom-0 right-0 m-6 bg-primary' variant="default" size="icon">
-      <ChevronUp  color="white" className="h-4 w-4" />
+        <ChevronUp color="white" className="h-4 w-4" />
       </Button>
     </section>
   );
