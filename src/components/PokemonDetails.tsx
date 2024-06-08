@@ -109,7 +109,7 @@ const PokemonDetails: React.FC<PokemonProps> = ({ data }) => {
           ))}
         </div>
       </CardContent>
-      <CardFooter className='grid gap-8 border-solid border-2 border-destructive rounded p-4'>
+      <CardFooter className='grid gap-8 border-solid border-2 border-primary rounded p-4'>
         {data.speciesData && (
             <div className='text-start flex flex-col gap-2'>
                <p>Evolves from: {capitalizeFirstLetter(data.speciesData.evolves_from_species?.name ?? '') || 'None'}</p>
