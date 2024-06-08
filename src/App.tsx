@@ -3,10 +3,11 @@ import axios from 'axios';
 import Filter from './components/Filter.tsx';
 import { Input } from "@/components/ui/input";
 import { ChevronUp } from "lucide-react";
-import {ChevronLeft } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import Pokemon from './components/Pokemon.tsx';
 import PokemonDetails from './components/PokemonDetails.tsx';
+import PaginationDemo from './components/PaginationDemo.tsx';
 
 interface Type {
   type: {
@@ -48,6 +49,7 @@ interface DataType {
   speciesData?: SpeciesData;
 }
 
+const ITEMS_PER_PAGE = 9;
 
 const App: React.FC = () => {
   const [pokemonList, setPokemonList] = useState<DataType[]>([]);
@@ -56,20 +58,38 @@ const App: React.FC = () => {
   const [selectedType, setSelectedType] = useState<string>("");
   const [selectedPokemon, setSelectedPokemon] = useState<DataType | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(0);
 
   useEffect(() => {
-    async function fetchAllPokemon() {
+    async function fetchTotalPokemon() {
       try {
+        const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=1');
+        setTotalPages(Math.ceil(response.data.count / ITEMS_PER_PAGE));
+      } catch (error) {
+        setError(error as Error);
+      }
+    }
+
+    fetchTotalPokemon();
+  }, []);
+
+  useEffect(() => {
+    async function fetchPokemon(page: number) {
+      setLoading(true);
+      try {
+        const offset = (page - 1) * ITEMS_PER_PAGE;
+        const limit = ITEMS_PER_PAGE;
         const pokemons: DataType[] = [];
-        for (let i = 1; i <= 151; i++) { // Adjust the range as needed
+        for (let i = offset + 1; i <= offset + limit; i++) {
           const response = await axios.get<DataType>(`https://pokeapi.co/api/v2/pokemon/${i}/`);
           const speciesResponse = await axios.get<SpeciesData>(`https://pokeapi.co/api/v2/pokemon-species/${i}/`);
-  
+
           const pokemonWithSpeciesData: DataType = {
             ...response.data,
             speciesData: speciesResponse.data
           };
-          
+
           pokemons.push(pokemonWithSpeciesData);
         }
         setPokemonList(pokemons);
@@ -79,10 +99,10 @@ const App: React.FC = () => {
         setLoading(false);
       }
     }
-  
-    fetchAllPokemon();
-  }, []);
-  
+
+    fetchPokemon(currentPage);
+  }, [currentPage]);
+
   const handleTypeSelect = (type: string) => {
     setSelectedType(type);
   };
@@ -109,29 +129,32 @@ const App: React.FC = () => {
       pokemon.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-screen">
-      <p>Loading...</p>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
-  if (error) return (
-    <div className="flex items-center justify-center h-screen">
-      <p>Error: {error.message}</p>
-    </div>
-  );
-  
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Error: {error.message}</p>
+      </div>
+    );
+  }
+
   return (
-    <section className='flex flex-col text-center bg-secondary py-[40px]'>
+    <section className='flex flex-col items-center text-center bg-secondary py-[40px]'>
       <h4 className='font-semibold text-3xl'>Pokedex</h4>
       <div className='flex flex-row justify-center gap-[20px] my-[40px]'>
         <div className='w-[360px]'>
-        <Input 
+          <Input 
             placeholder='Search Pokemon...'
             value={searchQuery}
             onChange={handleSearchChange}
@@ -148,14 +171,15 @@ const App: React.FC = () => {
          </div>
         ))}
       </div>
+      <PaginationDemo currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
       <Button onClick={scrollToTop} className='fixed bottom-0 right-0 m-6' variant="default" size="icon">
         <ChevronUp className="h-4 w-4" />
       </Button>
       {selectedPokemon && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="p-4 rounded-lg">
-            <Button onClick={handleCloseDetails} className="fixed bg-destructive top-0 left-0 mt-10 ml-2">
-              <ChevronLeft></ChevronLeft>
+          <div className="relative p-4 bg-white rounded-lg">
+            <Button onClick={handleCloseDetails} className="absolute top-0 left-0 mt-2 ml-2 bg-destructive">
+              <ChevronLeft />
             </Button>
             <PokemonDetails data={selectedPokemon} />
           </div>
