@@ -66,7 +66,7 @@ const Pokemon: React.FC<PokemonProps> = ({ data }) => {
   };
 
   return (
-    <Card className="w-[360px] p-8 hover:bg-secondary">
+    <Card className="w-[360px] h-[420px] p-8 hover:bg-secondary">
       <CardHeader className="bg-[url('./assets/bg-pokeball.png')] bg-contain bg-no-repeat bg-[length:260px] bg-center">
         <p className='text-end font-bold text-2xl'>{data.id}</p>
         <img src={data.sprites.front_default} alt="" className="w-[200px] mx-auto" />

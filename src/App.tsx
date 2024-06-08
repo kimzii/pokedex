@@ -3,13 +3,22 @@ import axios from 'axios';
 import Filter from './components/Filter.tsx';
 import { Input } from "@/components/ui/input";
 import { ChevronUp } from "lucide-react";
+import {ChevronLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import Pokemon from './components/Pokemon.tsx';
+import PokemonDetails from './components/PokemonDetails.tsx';
 
 interface Type {
   type: {
     name: string;
     url: string;
+  };
+}
+
+interface Stats {
+  base_stat: string;
+  stat: {
+    name: string;
   };
 }
 
@@ -20,6 +29,7 @@ interface DataType {
     front_default: string;
   };
   types: Type[];
+  stats: Stats[];
 }
 
 const App: React.FC = () => {
@@ -27,6 +37,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const [selectedType, setSelectedType] = useState<string>("");
+  const [selectedPokemon, setSelectedPokemon] = useState<DataType | null>(null);
 
   useEffect(() => {
     async function fetchAllPokemon() {
@@ -49,6 +60,14 @@ const App: React.FC = () => {
 
   const handleTypeSelect = (type: string) => {
     setSelectedType(type);
+  };
+
+  const handlePokemonClick = (pokemon: DataType) => {
+    setSelectedPokemon(pokemon); // Set the selected Pokemon
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedPokemon(null); // Close the details view
   };
 
   const filteredData = selectedType && selectedType !== "all"
@@ -77,12 +96,24 @@ const App: React.FC = () => {
       </div>
       <div className="flex flex-wrap gap-[20px] justify-center">
         {filteredData.map(pokemon => (
-          <Pokemon key={pokemon.id} data={pokemon} />
+         <div key={pokemon.id} onClick={() => handlePokemonClick(pokemon)}>
+            <Pokemon data={pokemon} />
+         </div>
         ))}
       </div>
-      <Button onClick={scrollToTop} className='fixed bottom-0 right-0 m-6 bg-primary' variant="default" size="icon">
-        <ChevronUp color="white" className="h-4 w-4" />
+      <Button onClick={scrollToTop} className='fixed bottom-0 right-0 m-6' variant="default" size="icon">
+        <ChevronUp className="h-4 w-4" />
       </Button>
+      {selectedPokemon && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="p-4 rounded-lg">
+            <Button onClick={handleCloseDetails} className="fixed top-0 left-0 mt-10 ml-2">
+              <ChevronLeft></ChevronLeft>
+            </Button>
+            <PokemonDetails data={selectedPokemon} />
+          </div>
+        </div>
+      )}
     </section>
   );
 };

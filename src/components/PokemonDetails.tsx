@@ -34,7 +34,7 @@ function capitalizeFirstLetter(string: string): string {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-const Pokemon: React.FC<PokemonProps> = ({ data }) => {
+const PokemonDetails: React.FC<PokemonProps> = ({ data }) => {
   const getTypeColorClass = (type: string): string => {
     switch (type.toLowerCase()) {
       case 'grass':
@@ -106,4 +106,4 @@ const Pokemon: React.FC<PokemonProps> = ({ data }) => {
   );
 };
 
-export default Pokemon;
+export default PokemonDetails;
