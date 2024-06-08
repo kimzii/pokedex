@@ -55,6 +55,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<Error | null>(null);
   const [selectedType, setSelectedType] = useState<string>("");
   const [selectedPokemon, setSelectedPokemon] = useState<DataType | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
     async function fetchAllPokemon() {
@@ -94,11 +95,20 @@ const App: React.FC = () => {
     setSelectedPokemon(null); // Close the details view
   };
 
-  const filteredData = selectedType && selectedType !== "all"
-    ? pokemonList.filter(pokemon =>
-        pokemon.types.some(t => t.type.name === selectedType)
-      )
-    : pokemonList;
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const filteredData = pokemonList
+    .filter(pokemon =>
+      selectedType && selectedType !== "all"
+        ? pokemon.types.some(t => t.type.name === selectedType)
+        : true
+    )
+    .filter(pokemon =>
+      pokemon.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -112,7 +122,11 @@ const App: React.FC = () => {
       <h4 className='font-semibold text-3xl'>Pokedex</h4>
       <div className='flex flex-row justify-center gap-[20px] my-[40px]'>
         <div className='w-[360px]'>
-          <Input placeholder='Search Pokemon...'></Input>
+        <Input 
+            placeholder='Search Pokemon...'
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
         </div>
         <div className='flex flex-row justify-center gap-[20px]'>
           <Filter onSelectType={handleTypeSelect} />

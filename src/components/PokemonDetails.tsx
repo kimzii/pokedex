@@ -113,7 +113,7 @@ const PokemonDetails: React.FC<PokemonProps> = ({ data }) => {
         {data.speciesData && (
             <div className='text-start flex flex-col gap-2'>
                <p>Evolves from: {capitalizeFirstLetter(data.speciesData.evolves_from_species?.name ?? '') || 'None'}</p>
-              {latestFlavorTextEntry && <p>{latestFlavorTextEntry.flavor_text}</p>}
+              {latestFlavorTextEntry && <p>Description: {latestFlavorTextEntry.flavor_text}</p>}
             </div>
           )}
 
