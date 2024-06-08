@@ -50,6 +50,7 @@ interface DataType {
 }
 
 const ITEMS_PER_PAGE = 24;
+const totalPokemon = 151;
 
 const App: React.FC = () => {
   const [pokemonList, setPokemonList] = useState<DataType[]>([]);
@@ -62,18 +63,10 @@ const App: React.FC = () => {
   const [totalPages, setTotalPages] = useState<number>(0);
 
   useEffect(() => {
-    async function fetchTotalPokemon() {
-      try {
-        const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=1');
-        setTotalPages(Math.ceil(response.data.count / ITEMS_PER_PAGE));
-      } catch (error) {
-        setError(error as Error);
-      }
-    }
-
-    fetchTotalPokemon();
+    const totalPages = Math.ceil(totalPokemon / ITEMS_PER_PAGE);
+    setTotalPages(totalPages);
   }, []);
-
+  
   useEffect(() => {
     async function fetchPokemon(page: number) {
       setLoading(true);
@@ -81,7 +74,7 @@ const App: React.FC = () => {
         const offset = (page - 1) * ITEMS_PER_PAGE;
         const limit = ITEMS_PER_PAGE;
         const pokemons: DataType[] = [];
-        for (let i = offset + 1; i <= offset + limit; i++) {
+        for (let i = offset + 1;  i <= Math.min(offset + limit, totalPokemon); i++) {
           const response = await axios.get<DataType>(`https://pokeapi.co/api/v2/pokemon/${i}/`);
           const speciesResponse = await axios.get<SpeciesData>(`https://pokeapi.co/api/v2/pokemon-species/${i}/`);
 
