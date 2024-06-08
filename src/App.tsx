@@ -171,13 +171,15 @@ const App: React.FC = () => {
          </div>
         ))}
       </div>
-      <PaginationDemo currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
+      <div className='mx-auto my-8'>
+        <PaginationDemo currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
+      </div>
       <Button onClick={scrollToTop} className='fixed bottom-0 right-0 m-6' variant="default" size="icon">
         <ChevronUp className="h-4 w-4" />
       </Button>
       {selectedPokemon && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="relative p-4 bg-white rounded-lg">
+          <div className="relative">
             <Button onClick={handleCloseDetails} className="fixed top-0 left-0 mt-8 ml-2 bg-destructive">
               <ChevronLeft />
             </Button>
