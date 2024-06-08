@@ -8,12 +8,26 @@ interface Type {
   };
 }
 
-
 interface Stats {
-  base_stat:string;
+  base_stat: string;
   stat: {
     name: string;
   };
+}
+
+interface FlavorTextEntry {
+  flavor_text: string;
+  language: {
+    name: string;
+    url: string;
+  };
+}
+
+interface SpeciesData {
+  evolves_from_species?: {
+    name: string;
+  };
+  flavor_text_entries: FlavorTextEntry[];
 }
 
 interface DataType {
@@ -24,6 +38,7 @@ interface DataType {
   };
   types: Type[];
   stats: Stats[];
+  speciesData?: SpeciesData;
 }
 
 interface PokemonProps {
@@ -74,8 +89,12 @@ const PokemonDetails: React.FC<PokemonProps> = ({ data }) => {
     }
   };
 
+  const latestFlavorTextEntry = data.speciesData?.flavor_text_entries
+  .filter((entry: FlavorTextEntry) => entry.language.name === 'en')
+  .pop();
+
   return (
-    <Card className="w-[360px] p-8">
+    <Card className="w-[360px] md:w-[760px] p-8">
       <CardHeader className="bg-[url('./assets/bg-pokeball.png')] bg-contain bg-no-repeat bg-[length:260px] bg-center">
         <p className='text-end font-bold text-2xl'>{data.id}</p>
         <img src={data.sprites.front_default} alt="" className="w-[200px] mx-auto" />
@@ -90,17 +109,27 @@ const PokemonDetails: React.FC<PokemonProps> = ({ data }) => {
           ))}
         </div>
       </CardContent>
-      <CardFooter className='grid grid-cols-1 text-start'>
-        {data.stats.map(stat => (
-          <div key={stat.stat.name}>
-            <span className="badge rounded px-[6px]">
-              {capitalizeFirstLetter(stat.stat.name)}
-            </span>
-            <span className="badge rounded px-[6px]">
-              {stat.base_stat}
-            </span>
+      <CardFooter className='grid gap-8 border-solid border-2 border-destructive rounded p-4'>
+        {data.speciesData && (
+            <div className='text-start flex flex-col gap-2'>
+               <p>Evolves from: {capitalizeFirstLetter(data.speciesData.evolves_from_species?.name ?? '') || 'None'}</p>
+              {latestFlavorTextEntry && <p>{latestFlavorTextEntry.flavor_text}</p>}
+            </div>
+          )}
+
+          <div className='grid md:grid-cols-3 justify-items-start gap-4'>
+            {data.stats.map(stat => (
+              
+              <div key={stat.stat.name}>
+                <span className=" px-[6px]">
+                  {capitalizeFirstLetter(stat.stat.name)}:
+                </span>
+                <span className=" px-[6px]">
+                  {stat.base_stat}
+                </span>
+              </div>
+            ))}
           </div>
-        ))}
       </CardFooter>
     </Card>
   );

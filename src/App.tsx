@@ -22,6 +22,21 @@ interface Stats {
   };
 }
 
+interface FlavorTextEntry {
+  flavor_text: string;
+  language: {
+    name: string;
+    url: string;
+  };
+}
+
+interface SpeciesData {
+  evolves_from_species?: {
+    name: string;
+  };
+  flavor_text_entries: FlavorTextEntry[];
+}
+
 interface DataType {
   id: number;
   name: string;
@@ -30,7 +45,9 @@ interface DataType {
   };
   types: Type[];
   stats: Stats[];
+  speciesData?: SpeciesData;
 }
+
 
 const App: React.FC = () => {
   const [pokemonList, setPokemonList] = useState<DataType[]>([]);
@@ -45,7 +62,14 @@ const App: React.FC = () => {
         const pokemons: DataType[] = [];
         for (let i = 1; i <= 151; i++) { // Adjust the range as needed
           const response = await axios.get<DataType>(`https://pokeapi.co/api/v2/pokemon/${i}/`);
-          pokemons.push(response.data);
+          const speciesResponse = await axios.get<SpeciesData>(`https://pokeapi.co/api/v2/pokemon-species/${i}/`);
+  
+          const pokemonWithSpeciesData: DataType = {
+            ...response.data,
+            speciesData: speciesResponse.data
+          };
+          
+          pokemons.push(pokemonWithSpeciesData);
         }
         setPokemonList(pokemons);
       } catch (error) {
@@ -54,10 +78,10 @@ const App: React.FC = () => {
         setLoading(false);
       }
     }
-
+  
     fetchAllPokemon();
   }, []);
-
+  
   const handleTypeSelect = (type: string) => {
     setSelectedType(type);
   };
@@ -107,7 +131,7 @@ const App: React.FC = () => {
       {selectedPokemon && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="p-4 rounded-lg">
-            <Button onClick={handleCloseDetails} className="fixed top-0 left-0 mt-10 ml-2">
+            <Button onClick={handleCloseDetails} className="fixed bg-destructive top-0 left-0 mt-10 ml-2">
               <ChevronLeft></ChevronLeft>
             </Button>
             <PokemonDetails data={selectedPokemon} />
