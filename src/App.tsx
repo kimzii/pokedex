@@ -152,8 +152,8 @@ const App: React.FC = () => {
   return (
     <section className='flex flex-col items-center text-center bg-secondary py-[40px]'>
       <h4 className='font-semibold text-3xl'>Pokedex</h4>
-      <div className='flex flex-row justify-center gap-[20px] my-[40px]'>
-        <div className='w-[360px]'>
+      <div className='flex flex-col justify-center gap-[20px] my-[40px] md:flex-row'>
+        <div className='w-[300px] md:w-[400px]'>
           <Input 
             placeholder='Search Pokemon...'
             value={searchQuery}
