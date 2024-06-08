@@ -8,6 +8,14 @@ import { Button } from "@/components/ui/button";
 import Pokemon from './components/Pokemon.tsx';
 import PokemonDetails from './components/PokemonDetails.tsx';
 import PaginationDemo from './components/PaginationDemo.tsx';
+import { Terminal } from "lucide-react";
+import { AlertCircle } from "lucide-react";
+ 
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
 
 interface Type {
   type: {
@@ -137,17 +145,31 @@ const App: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p>Loading...</p>
+      <div className="flex items-center justify-center w-screen h-screen">
+        <div className="flex items-center justify-center w-[300px]">
+          <Alert>
+            <Terminal className="h-4 w-4" />
+            <AlertTitle>Loading Pokemons...</AlertTitle>
+          </Alert>
+        </div>
       </div>
     );
   }
-
+  
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p>Error: {error.message}</p>
-      </div>
+      <div className="flex items-center justify-center w-screen h-screen">
+        <div className="flex items-center justify-center w-[300px]">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+              {error.message}
+              </AlertDescription>
+            </Alert>
+        </div>
+    </div>
+
     );
   }
 
