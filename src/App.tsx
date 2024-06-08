@@ -178,7 +178,7 @@ const App: React.FC = () => {
       {selectedPokemon && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="relative p-4 bg-white rounded-lg">
-            <Button onClick={handleCloseDetails} className="absolute top-0 left-0 mt-2 ml-2 bg-destructive">
+            <Button onClick={handleCloseDetails} className="fixed top-0 left-0 mt-8 ml-2 bg-destructive">
               <ChevronLeft />
             </Button>
             <PokemonDetails data={selectedPokemon} />
