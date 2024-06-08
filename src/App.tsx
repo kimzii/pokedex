@@ -61,43 +61,54 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
+  const [totalPokemonOfType, setTotalPokemonOfType] = useState<number>(totalPokemon);
 
   useEffect(() => {
-    const totalPages = Math.ceil(totalPokemon / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(totalPokemonOfType / ITEMS_PER_PAGE);
     setTotalPages(totalPages);
-  }, []);
-  
+  }, [totalPokemonOfType]);
+
   useEffect(() => {
-    async function fetchPokemon(page: number) {
+    async function fetchPokemon() {
       setLoading(true);
       try {
-        const offset = (page - 1) * ITEMS_PER_PAGE;
-        const limit = ITEMS_PER_PAGE;
         const pokemons: DataType[] = [];
-        for (let i = offset + 1;  i <= Math.min(offset + limit, totalPokemon); i++) {
+        let pokemonCount = 0;
+        for (let i = 1; i <= totalPokemon; i++) {
           const response = await axios.get<DataType>(`https://pokeapi.co/api/v2/pokemon/${i}/`);
           const speciesResponse = await axios.get<SpeciesData>(`https://pokeapi.co/api/v2/pokemon-species/${i}/`);
-
+  
           const pokemonWithSpeciesData: DataType = {
             ...response.data,
             speciesData: speciesResponse.data
           };
-
-          pokemons.push(pokemonWithSpeciesData);
+  
+          // Check if the Pokemon matches the selected type
+          if (
+            selectedType === "" || selectedType === "all" ||
+            pokemonWithSpeciesData.types.some(
+              (type) => type.type.name === selectedType
+            )
+          ) {
+            pokemons.push(pokemonWithSpeciesData);
+            pokemonCount++;
+          }
         }
         setPokemonList(pokemons);
+        setTotalPokemonOfType(pokemonCount); // Update total Pokemon of the selected type
       } catch (error) {
         setError(error as Error);
       } finally {
         setLoading(false);
       }
     }
-
-    fetchPokemon(currentPage);
-  }, [currentPage]);
+  
+    fetchPokemon(); // Fetch Pokemon for the selected type
+  }, [selectedType]);
 
   const handleTypeSelect = (type: string) => {
     setSelectedType(type);
+    setCurrentPage(1); // Reset pagination when a new type is selected
   };
 
   const handlePokemonClick = (pokemon: DataType) => {
@@ -114,13 +125,11 @@ const App: React.FC = () => {
 
   const filteredData = pokemonList
     .filter(pokemon =>
-      selectedType && selectedType !== "all"
-        ? pokemon.types.some(t => t.type.name === selectedType)
-        : true
-    )
-    .filter(pokemon =>
       pokemon.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+  // Paginated data based on current page
+  const paginatedData = filteredData.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -152,13 +161,13 @@ const App: React.FC = () => {
             value={searchQuery}
             onChange={handleSearchChange}
           />
-        </div>
+        </div>  
         <div className='flex flex-row justify-center gap-[20px]'>
           <Filter onSelectType={handleTypeSelect} />
         </div>
       </div>
       <div className="flex flex-wrap gap-[20px] justify-center">
-        {filteredData.map(pokemon => (
+        {paginatedData.map(pokemon => (
          <div key={pokemon.id} onClick={() => handlePokemonClick(pokemon)}>
             <Pokemon data={pokemon} />
          </div>
