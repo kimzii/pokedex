@@ -49,7 +49,7 @@ interface DataType {
   speciesData?: SpeciesData;
 }
 
-const ITEMS_PER_PAGE = 9;
+const ITEMS_PER_PAGE = 24;
 
 const App: React.FC = () => {
   const [pokemonList, setPokemonList] = useState<DataType[]>([]);
