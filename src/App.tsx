@@ -114,9 +114,18 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  if (loading) return (
+    <div className="flex items-center justify-center h-screen">
+      <p>Loading...</p>
+    </div>
+  );
 
+  if (error) return (
+    <div className="flex items-center justify-center h-screen">
+      <p>Error: {error.message}</p>
+    </div>
+  );
+  
   return (
     <section className='flex flex-col text-center bg-secondary py-[40px]'>
       <h4 className='font-semibold text-3xl'>Pokedex</h4>
