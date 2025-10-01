@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import Pokemon from "./components/Pokemon.tsx";
 import PokemonDetails from "./components/PokemonDetails.tsx";
 import PaginationDemo from "./components/PaginationDemo.tsx";
-import { Terminal } from "lucide-react";
 import { AlertCircle } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -277,19 +276,21 @@ const App: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center w-screen h-screen">
-        <div className="flex items-center justify-center w-[300px]">
-          <Alert>
-            <Terminal className="h-4 w-4" />
-            <AlertTitle>
-              {isSearching ? "Searching Pokemons..." : "Loading Pokemons..."}
-            </AlertTitle>
-          </Alert>
-        </div>
+  return (
+    <div className="flex items-center justify-center w-screen h-screen">
+      <div className="flex flex-col items-center justify-center">
+        <img 
+          src="/pikachu.gif" 
+          alt={isSearching ? "Searching Pokémon..." : "Loading Pokémon..."}
+          className="w-32 h-32 object-contain"
+        />
+        <p className="mt-4 text-lg font-medium">
+          {isSearching ? "Searching Pokémon..." : "Loading Pokémon..."}
+        </p>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   if (error) {
     return (
