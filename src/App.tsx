@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Filter from "./components/Filter.tsx";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import Pokemon from "./components/Pokemon.tsx";
 import PokemonDetails from "./components/PokemonDetails.tsx";
 import PaginationDemo from "./components/PaginationDemo.tsx";
 import { AlertCircle } from "lucide-react";
+import Hero from "./components/Hero.tsx";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -77,6 +78,9 @@ const App: React.FC = () => {
   );
   const [searchResults, setSearchResults] = useState<DataType[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
+  
+  // Ref for scrolling to pokedex section
+  const pokedexRef = useRef<HTMLDivElement>(null);
 
   // Fetch all Pokemon names on component mount for search functionality
   useEffect(() => {
@@ -275,6 +279,10 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const scrollToPokedex = () => {
+    pokedexRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   if (loading) {
   return (
     <div className="flex items-center justify-center w-screen h-screen">
@@ -307,20 +315,28 @@ const App: React.FC = () => {
   }
 
   return (
-    <section className="flex flex-col items-center text-center bg-secondary py-[40px]">
-      <h4 className="font-semibold text-3xl">Pokedex</h4>
-      <div className="flex flex-col justify-center gap-[20px] my-[40px] md:flex-row">
-        <div className="w-[300px] md:w-[400px]">
-          <Input
-            placeholder="Search Pokemon..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-          />
+    <>
+      {/* Hero Section */}
+      <Hero onViewDeck={scrollToPokedex} />
+
+      {/* Pokedex Section */}
+      <section
+        ref={pokedexRef}
+        className="flex flex-col items-center text-center bg-secondary py-[40px]"
+      >
+        <h4 className="font-semibold text-3xl">Pokedex</h4>
+        <div className="flex flex-col justify-center gap-[20px] my-[40px] md:flex-row">
+          <div className="w-[300px] md:w-[400px]">
+            <Input
+              placeholder="Search Pokemon..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+            />
+          </div>
+          <div className="flex flex-row justify-center gap-[20px]">
+            <Filter onSelectType={handleTypeSelect} />
+          </div>
         </div>
-        <div className="flex flex-row justify-center gap-[20px]">
-          <Filter onSelectType={handleTypeSelect} />
-        </div>
-      </div>
 
       {/* Show search info */}
       {isSearching && (
@@ -371,7 +387,8 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
-    </section>
+      </section>
+    </>
   );
 };
 
