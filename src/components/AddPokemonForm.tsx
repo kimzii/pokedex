@@ -2,37 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
-
-interface Pokemon {
-  name: string;
-  sprites: {
-    front_default: string;
-  };
-  types: Array<{
-    type: {
-      name: string;
-      url: string;
-    };
-  }>;
-  stats: Array<{
-    base_stat: string;
-    stat: {
-      name: string;
-    };
-  }>;
-  speciesData: {
-    evolves_from_species: {
-      name: string;
-    };
-    flavor_text_entries: Array<{
-      flavor_text: string;
-      language: {
-        name: string;
-        url: string;
-      };
-    }>;
-  };
-}
+import { Pokemon } from "../types/pokemon";
 
 interface AddPokemonFormProps {
   onSubmit: (data: Pokemon) => void;
@@ -106,11 +76,19 @@ const AddPokemonForm: React.FC<AddPokemonFormProps> = ({
     e.preventDefault();
 
     try {
-      const pokemonData = {
+      const pokemonData: Pokemon = {
+        id: 0, // Will be set by server
         name: formData.name.trim(),
         imageUrl: formData.sprites.front_default.trim(),
         type: formData.types[0].type.name,
-        stats: formData.stats,
+        stats: {
+          hp: formData.stats[0].base_stat,
+          attack: formData.stats[1].base_stat,
+          defense: formData.stats[2].base_stat,
+          specialAttack: formData.stats[3].base_stat,
+          specialDefense: formData.stats[4].base_stat,
+          speed: formData.stats[5].base_stat,
+        },
         description:
           formData.speciesData?.flavor_text_entries[0]?.flavor_text || "",
         evolvesFrom: formData.speciesData?.evolves_from_species?.name || "",

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ChevronUp } from "lucide-react";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Pokemon from "./components/Pokemon.tsx";
+import PokemonCard from "./components/Pokemon.tsx";
 import PokemonDetails from "./components/PokemonDetails.tsx";
 import PaginationDemo from "./components/PaginationDemo.tsx";
 import { AlertCircle } from "lucide-react";
@@ -13,6 +13,7 @@ import Hero from "./components/Hero.tsx";
 import AddPokemonForm from "./components/AddPokemonForm.tsx";
 import CustomPokemon from "./components/CustomPokemon";
 import CustomPokemonDetails from "./components/CustomPokemonDetails";
+import { Pokemon } from "./types/pokemon";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -59,23 +60,6 @@ interface DataType {
 interface PokemonListItem {
   name: string;
   url: string;
-}
-
-interface Pokemon {
-  id: number;
-  name: string;
-  imageUrl: string;
-  type: string;
-  stats: {
-    hp: string;
-    attack: string;
-    defense: string;
-    specialAttack: string;
-    specialDefense: string;
-    speed: string;
-  };
-  description: string;
-  evolvesFrom: string;
 }
 
 const ITEMS_PER_PAGE = 24;
@@ -363,7 +347,7 @@ const App: React.FC = () => {
         <div className="flex flex-wrap gap-[20px] justify-center">
           {pokemonList.map((pokemon: DataType) => (
             <div key={pokemon.id} onClick={() => handlePokemonClick(pokemon)}>
-              <Pokemon data={pokemon} />
+              <PokemonCard data={pokemon} />
             </div>
           ))}
         </div>
