@@ -10,6 +10,9 @@ import PokemonDetails from "./components/PokemonDetails.tsx";
 import PaginationDemo from "./components/PaginationDemo.tsx";
 import { AlertCircle } from "lucide-react";
 import Hero from "./components/Hero.tsx";
+import AddPokemonForm from "./components/AddPokemonForm.tsx";
+import CustomPokemon from "./components/CustomPokemon";
+import CustomPokemonDetails from "./components/CustomPokemonDetails";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -58,6 +61,23 @@ interface PokemonListItem {
   url: string;
 }
 
+interface Pokemon {
+  id: number;
+  name: string;
+  imageUrl: string;
+  type: string;
+  stats: {
+    hp: string;
+    attack: string;
+    defense: string;
+    specialAttack: string;
+    specialDefense: string;
+    speed: string;
+  };
+  description: string;
+  evolvesFrom: string;
+}
+
 const ITEMS_PER_PAGE = 24;
 const totalPokemon = 151;
 
@@ -73,6 +93,15 @@ const App: React.FC = () => {
   const [totalPages, setTotalPages] = useState<number>(0);
   const [pokemonCache, setPokemonCache] = useState<Map<number, DataType>>(
     new Map()
+  );
+  const [customPokemon, setCustomPokemon] = useState<DataType[]>([]);
+  const [isAddFormOpen, setIsAddFormOpen] = useState<boolean>(false);
+
+  // Add these state variables at the top with other states
+  const [customPokemonLoading, setCustomPokemonLoading] =
+    useState<boolean>(true);
+  const [customPokemonError, setCustomPokemonError] = useState<string | null>(
+    null
   );
 
   // Ref for scrolling to pokedex section
@@ -91,6 +120,29 @@ const App: React.FC = () => {
       }
     };
     fetchAllPokemonNames();
+  }, []);
+
+  // Update the useEffect for fetching custom Pokemon
+  useEffect(() => {
+    const fetchCustomPokemon = async () => {
+      setCustomPokemonLoading(true);
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/pokemon/custom"
+        );
+        setCustomPokemon(response.data);
+        setCustomPokemonError(null);
+      } catch (error) {
+        console.error("Error fetching custom Pokemon:", error);
+        setCustomPokemonError(
+          "Failed to load custom Pokemon. Please try again later."
+        );
+      } finally {
+        setCustomPokemonLoading(false);
+      }
+    };
+
+    fetchCustomPokemon();
   }, []);
 
   // Helper function to fetch Pokemon data
@@ -326,30 +378,185 @@ const App: React.FC = () => {
             />
           </div>
         )}
+      </section>
 
+      {/* Custom Pokemon Section */}
+      <section className="flex flex-col items-center text-center bg-primary-foreground py-[40px]">
+        <h4 className="font-semibold text-2xl mb-8">Custom Pokemon</h4>
         <Button
-          onClick={scrollToTop}
-          className="fixed bottom-0 right-0 m-6"
-          variant="default"
-          size="icon"
+          variant="outline"
+          className="mb-8"
+          onClick={() => setIsAddFormOpen(true)}
         >
-          <ChevronUp className="h-4 w-4" />
+          Add Custom Pokemon
         </Button>
 
-        {selectedPokemon && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="relative">
-              <Button
-                onClick={handleCloseDetails}
-                className="fixed top-0 left-0 mt-8 ml-2 bg-destructive"
+        {customPokemonLoading ? (
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          </div>
+        ) : customPokemonError ? (
+          <Alert variant="destructive" className="max-w-md">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{customPokemonError}</AlertDescription>
+          </Alert>
+        ) : (
+          <div className="flex flex-wrap gap-[20px] justify-center">
+            {customPokemon.map((pokemon) => (
+              <div
+                key={pokemon?.id}
+                onClick={() => handlePokemonClick(pokemon)}
               >
-                <ChevronLeft />
-              </Button>
-              <PokemonDetails data={selectedPokemon} />
-            </div>
+                <CustomPokemon
+                  data={{
+                    id: pokemon?.id || Date.now(),
+                    name: pokemon?.name || "",
+                    imageUrl: pokemon?.sprites?.front_default || "",
+                    type: pokemon?.types?.[0]?.type?.name || "normal",
+                    stats: {
+                      hp: String(pokemon?.stats?.[0]?.base_stat || 45),
+                      attack: String(pokemon?.stats?.[1]?.base_stat || 45),
+                      defense: String(pokemon?.stats?.[2]?.base_stat || 45),
+                      specialAttack: String(
+                        pokemon?.stats?.[3]?.base_stat || 45
+                      ),
+                      specialDefense: String(
+                        pokemon?.stats?.[4]?.base_stat || 45
+                      ),
+                      speed: String(pokemon?.stats?.[5]?.base_stat || 45),
+                    },
+                    description:
+                      pokemon?.speciesData?.flavor_text_entries?.[0]
+                        ?.flavor_text || "",
+                    evolvesFrom:
+                      pokemon?.speciesData?.evolves_from_species?.name || "",
+                  }}
+                />
+              </div>
+            ))}
           </div>
         )}
       </section>
+
+      <Button
+        onClick={scrollToTop}
+        className="fixed bottom-0 right-0 m-6"
+        variant="default"
+        size="icon"
+      >
+        <ChevronUp className="h-4 w-4" />
+      </Button>
+
+      {selectedPokemon && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="relative">
+            <Button
+              onClick={handleCloseDetails}
+              className="fixed top-0 left-0 mt-8 ml-2 bg-destructive"
+            >
+              <ChevronLeft />
+            </Button>
+            {customPokemon.find((p) => p.id === selectedPokemon.id) ? (
+              // Use CustomPokemonDetails for custom Pokemon
+              <CustomPokemonDetails
+                data={{
+                  id: selectedPokemon.id,
+                  name: selectedPokemon.name,
+                  imageUrl: selectedPokemon.sprites.front_default,
+                  type: selectedPokemon.types[0].type.name,
+                  stats: {
+                    hp: String(selectedPokemon.stats[0]?.base_stat || 45),
+                    attack: String(selectedPokemon.stats[1]?.base_stat || 45),
+                    defense: String(selectedPokemon.stats[2]?.base_stat || 45),
+                    specialAttack: String(
+                      selectedPokemon.stats[3]?.base_stat || 45
+                    ),
+                    specialDefense: String(
+                      selectedPokemon.stats[4]?.base_stat || 45
+                    ),
+                    speed: String(selectedPokemon.stats[5]?.base_stat || 45),
+                  },
+                  description:
+                    selectedPokemon.speciesData?.flavor_text_entries[0]
+                      ?.flavor_text || "",
+                  evolvesFrom:
+                    selectedPokemon.speciesData?.evolves_from_species?.name ||
+                    "",
+                }}
+              />
+            ) : (
+              // Use regular PokemonDetails for API Pokemon
+              <PokemonDetails data={selectedPokemon} />
+            )}
+          </div>
+        </div>
+      )}
+
+      {isAddFormOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-8 rounded-lg">
+            <AddPokemonForm
+              onSubmit={(pokemonData: Pokemon) => {
+                const newPokemon: DataType = {
+                  id: pokemonData.id,
+                  name: pokemonData.name,
+                  sprites: {
+                    front_default: pokemonData.imageUrl,
+                  },
+                  types: [
+                    {
+                      type: {
+                        name: pokemonData.type,
+                        url: `https://pokeapi.co/api/v2/type/${pokemonData.type}`,
+                      },
+                    },
+                  ],
+                  stats: [
+                    { base_stat: pokemonData.stats.hp, stat: { name: "hp" } },
+                    {
+                      base_stat: pokemonData.stats.attack,
+                      stat: { name: "attack" },
+                    },
+                    {
+                      base_stat: pokemonData.stats.defense,
+                      stat: { name: "defense" },
+                    },
+                    {
+                      base_stat: pokemonData.stats.specialAttack,
+                      stat: { name: "special-attack" },
+                    },
+                    {
+                      base_stat: pokemonData.stats.specialDefense,
+                      stat: { name: "special-defense" },
+                    },
+                    {
+                      base_stat: pokemonData.stats.speed,
+                      stat: { name: "speed" },
+                    },
+                  ],
+                  speciesData: {
+                    evolves_from_species: { name: pokemonData.evolvesFrom },
+                    flavor_text_entries: [
+                      {
+                        flavor_text: pokemonData.description,
+                        language: {
+                          name: "en",
+                          url: "https://pokeapi.co/api/v2/language/9/",
+                        },
+                      },
+                    ],
+                  },
+                };
+
+                setCustomPokemon((prev) => [...prev, newPokemon]);
+                setIsAddFormOpen(false);
+              }}
+              onCancel={() => setIsAddFormOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };
