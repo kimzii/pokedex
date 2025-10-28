@@ -10,6 +10,7 @@ import PokemonDetails from "./components/PokemonDetails.tsx";
 import PaginationDemo from "./components/PaginationDemo.tsx";
 import { AlertCircle } from "lucide-react";
 import Hero from "./components/Hero.tsx";
+import AddPokemonForm from "./components/AddPokemonForm.tsx";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -92,6 +93,7 @@ const App: React.FC = () => {
     new Map()
   );
   const [customPokemon, setCustomPokemon] = useState<DataType[]>([]);
+  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
 
   // Ref for scrolling to pokedex section
   const pokedexRef = useRef<HTMLDivElement>(null);
@@ -357,6 +359,54 @@ const App: React.FC = () => {
     );
   }
 
+  // Add this with your other handler functions
+  const handleAddPokemonSubmit = (pokemon: CustomPokemon) => {
+    const transformedPokemon: DataType = {
+      id: pokemon.id,
+      name: pokemon.name,
+      sprites: {
+        front_default: pokemon.imageUrl,
+      },
+      types: [
+        {
+          type: {
+            name: pokemon.type,
+            url: `https://pokeapi.co/api/v2/type/${pokemon.type}`,
+          },
+        },
+      ],
+      stats: [
+        { base_stat: pokemon.stats.hp, stat: { name: "hp" } },
+        { base_stat: pokemon.stats.attack, stat: { name: "attack" } },
+        { base_stat: pokemon.stats.defense, stat: { name: "defense" } },
+        {
+          base_stat: pokemon.stats.specialAttack,
+          stat: { name: "special-attack" },
+        },
+        {
+          base_stat: pokemon.stats.specialDefense,
+          stat: { name: "special-defense" },
+        },
+        { base_stat: pokemon.stats.speed, stat: { name: "speed" } },
+      ],
+      speciesData: {
+        evolves_from_species: { name: pokemon.evolvesFrom },
+        flavor_text_entries: [
+          {
+            flavor_text: pokemon.description,
+            language: {
+              name: "en",
+              url: "https://pokeapi.co/api/v2/language/9/",
+            },
+          },
+        ],
+      },
+    };
+
+    setCustomPokemon((prev) => [...prev, transformedPokemon]);
+    setIsAddFormOpen(false);
+  };
+
   return (
     <>
       {/* Hero Section */}
@@ -410,7 +460,15 @@ const App: React.FC = () => {
       </section>
 
       <section className="flex flex-col items-center text-center bg-primary/5 py-[40px]">
-        <h4 className="font-semibold text-3xl mb-8">Custom Pokemon</h4>
+        <div className="flex items-center gap-4 mb-8">
+          <h4 className="font-semibold text-3xl">Custom Pokemon</h4>
+          <Button
+            onClick={() => setIsAddFormOpen(true)}
+            variant="default"
+          >
+            Add Pokemon
+          </Button>
+        </div>
         <div className="container mx-auto">
           <div className="flex flex-wrap gap-[20px] justify-center">
             {customPokemon.map((pokemon: DataType) => (
@@ -425,6 +483,28 @@ const App: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Add this just before the closing </> */}
+      {isAddFormOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-8 rounded-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold">Add New Pokemon</h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsAddFormOpen(false)}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            </div>
+            <AddPokemonForm
+              onSubmit={handleAddPokemonSubmit}
+              onCancel={() => setIsAddFormOpen(false)}
+            />
+          </div>
+        </div>
+      )}
 
       <Button
         onClick={scrollToTop}
