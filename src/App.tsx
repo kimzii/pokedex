@@ -469,7 +469,7 @@ const App: React.FC = () => {
             Add Pokemon
           </Button>
         </div>
-        <div className="container mx-auto">
+        <div className="">
           <div className="flex flex-wrap gap-[20px] justify-center">
             {customPokemon.map((pokemon: DataType) => (
               <div
