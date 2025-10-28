@@ -13,19 +13,19 @@ app.use(express.json());
 
 // MongoDB Connection with error handling
 mongoose
-  .connect("mongodb://127.0.0.1:27017/pokedex", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("Connected to MongoDB successfully");
-  })
-  .catch((err) => {
-    console.error("MongoDB connection error:", err);
-    process.exit(1);
-  });
+  .connect(process.env.MONGODB_URI)
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 app.use("/api/pokemon", pokemonRoutes);
+
+// Add detailed route logging
+app._router.stack
+  .filter((r) => r.route)
+  .forEach((r) => {
+    console.log(`Route: ${r.route.path}`);
+    console.log(`Methods:`, Object.keys(r.route.methods));
+  });
 
 const PORT = 5000;
 app.listen(PORT, () => {

@@ -407,6 +407,44 @@ const App: React.FC = () => {
     setIsAddFormOpen(false);
   };
 
+  const handleDeletePokemon = async (pokemonId: number) => {
+    try {
+      console.log("Attempting to delete Pokemon:", pokemonId);
+
+      const response = await axios.delete(
+        `http://localhost:5000/api/pokemon/custom/${pokemonId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Delete response:", response);
+
+      if (response.status === 200) {
+        setCustomPokemon((prev) =>
+          prev.filter((pokemon) => pokemon.id !== pokemonId)
+        );
+        handleCloseDetails();
+        alert("Pokemon deleted successfully");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Delete request failed:", {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message,
+        });
+        alert(
+          `Failed to delete Pokemon: ${
+            error.response?.data?.message || error.message
+          }`
+        );
+      }
+    }
+  };
+
   return (
     <>
       {/* Hero Section */}
@@ -462,10 +500,7 @@ const App: React.FC = () => {
       <section className="flex flex-col items-center text-center bg-primary/5 py-[40px]">
         <div className="flex items-center gap-4 mb-8">
           <h4 className="font-semibold text-3xl">Custom Pokemon</h4>
-          <Button
-            onClick={() => setIsAddFormOpen(true)}
-            variant="default"
-          >
+          <Button onClick={() => setIsAddFormOpen(true)} variant="default">
             Add Pokemon
           </Button>
         </div>
@@ -518,12 +553,33 @@ const App: React.FC = () => {
       {selectedPokemon && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="relative">
-            <Button
-              onClick={handleCloseDetails}
-              className="fixed top-0 left-0 mt-8 ml-2 bg-destructive"
-            >
-              <ChevronLeft />
-            </Button>
+            <div className="flex gap-2 fixed top-0 left-0 mt-8 ml-2">
+              <Button onClick={handleCloseDetails} className="bg-destructive">
+                <ChevronLeft />
+              </Button>
+
+              {selectedPokemon.id >= 1001 && (
+                <Button
+                  onClick={() => {
+                    console.log(
+                      "Attempting to delete Pokemon with ID:",
+                      selectedPokemon.id
+                    ); // Debug log
+                    if (
+                      window.confirm(
+                        "Are you sure you want to delete this Pokemon?"
+                      )
+                    ) {
+                      handleDeletePokemon(selectedPokemon.id);
+                    }
+                  }}
+                  variant="destructive"
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Delete
+                </Button>
+              )}
+            </div>
             <PokemonDetails data={selectedPokemon} />
           </div>
         </div>
