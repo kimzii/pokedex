@@ -6,16 +6,20 @@ const pokemonSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  name: {
+  name: String,
+  imageUrl: String,
+  type: {
     type: String,
     required: true,
   },
-  imageUrl: {
-    type: String,
-    required: true,
+  stats: {
+    hp: String,
+    attack: String,
+    defense: String,
+    specialAttack: String,
+    specialDefense: String,
+    speed: String,
   },
-  type: String,
-  stats: Array,
   description: String,
   evolvesFrom: String,
 });

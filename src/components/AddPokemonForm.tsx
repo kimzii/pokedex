@@ -50,25 +50,26 @@ const AddPokemonForm: React.FC<AddPokemonFormProps> = ({
     },
   });
 
+  // Update the pokemonTypes array with type IDs
   const pokemonTypes = [
-    "normal",
-    "fire",
-    "water",
-    "electric",
-    "grass",
-    "ice",
-    "fighting",
-    "poison",
-    "ground",
-    "flying",
-    "psychic",
-    "bug",
-    "rock",
-    "ghost",
-    "dragon",
-    "dark",
-    "steel",
-    "fairy",
+    { name: "normal", id: 1 },
+    { name: "fighting", id: 2 },
+    { name: "flying", id: 3 },
+    { name: "poison", id: 4 },
+    { name: "ground", id: 5 },
+    { name: "rock", id: 6 },
+    { name: "bug", id: 7 },
+    { name: "ghost", id: 8 },
+    { name: "steel", id: 9 },
+    { name: "fire", id: 10 },
+    { name: "water", id: 11 },
+    { name: "grass", id: 12 },
+    { name: "electric", id: 13 },
+    { name: "psychic", id: 14 },
+    { name: "ice", id: 15 },
+    { name: "dragon", id: 16 },
+    { name: "dark", id: 17 },
+    { name: "fairy", id: 18 },
   ];
 
   // Update the handleSubmit function
@@ -76,10 +77,15 @@ const AddPokemonForm: React.FC<AddPokemonFormProps> = ({
     e.preventDefault();
 
     try {
-      const pokemonData: Pokemon = {
-        id: 0, // Will be set by server
+      // Get the selected type from form state
+      const selectedType = pokemonTypes.find(
+        (t) => t.name === formData.types[0].type.name
+      );
+
+      const pokemonData = {
         name: formData.name.trim(),
         imageUrl: formData.sprites.front_default.trim(),
+        // Send type as a simple string instead of an array
         type: formData.types[0].type.name,
         stats: {
           hp: formData.stats[0].base_stat,
@@ -94,27 +100,22 @@ const AddPokemonForm: React.FC<AddPokemonFormProps> = ({
         evolvesFrom: formData.speciesData?.evolves_from_species?.name || "",
       };
 
+      console.log("Selected type:", selectedType?.name); // Debug log
+      console.log("Type being sent:", formData.types[0].type.name); // Debug log
+
       const response = await axios.post(
         "http://localhost:5000/api/pokemon/custom",
         pokemonData
       );
 
       if (response.status === 201) {
-        console.log("Pokemon saved successfully:", response.data);
+        console.log("Pokemon saved:", response.data);
         onSubmit(response.data);
-        // Reset form
-        setFormData({
+        // Reset form while keeping the current type
+        setFormData((prev) => ({
+          ...prev,
           name: "",
           sprites: { front_default: "" },
-          types: [{ type: { name: "normal", url: "" } }],
-          stats: [
-            { base_stat: "45", stat: { name: "hp" } },
-            { base_stat: "45", stat: { name: "attack" } },
-            { base_stat: "45", stat: { name: "defense" } },
-            { base_stat: "45", stat: { name: "special-attack" } },
-            { base_stat: "45", stat: { name: "special-defense" } },
-            { base_stat: "45", stat: { name: "speed" } },
-          ],
           speciesData: {
             evolves_from_species: { name: "" },
             flavor_text_entries: [
@@ -127,15 +128,11 @@ const AddPokemonForm: React.FC<AddPokemonFormProps> = ({
               },
             ],
           },
-        });
+        }));
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        if (error.response?.status === 409) {
-          alert("A Pokemon with this name already exists");
-          return;
-        }
-        console.error("Error:", error.response?.data);
+        console.error("Full error:", error.response?.data); // More detailed error logging
         alert("Failed to save Pokemon. Please try again.");
       }
     }
@@ -185,7 +182,10 @@ const AddPokemonForm: React.FC<AddPokemonFormProps> = ({
               <label className="block text-sm font-medium mb-1">Type</label>
               <select
                 value={formData.types[0].type.name}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const selectedType = pokemonTypes.find(
+                    (t) => t.name === e.target.value
+                  );
                   setFormData({
                     ...formData,
                     types: [
@@ -193,19 +193,19 @@ const AddPokemonForm: React.FC<AddPokemonFormProps> = ({
                         type: {
                           name: e.target.value,
                           url: `https://pokeapi.co/api/v2/type/${
-                            pokemonTypes.indexOf(e.target.value) + 1
+                            selectedType?.id || 1
                           }`,
                         },
                       },
                     ],
-                  })
-                }
+                  });
+                }}
                 className="w-full rounded-md border border-input bg-background px-3 py-2"
                 required
               >
                 {pokemonTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  <option key={type.name} value={type.name}>
+                    {type.name.charAt(0).toUpperCase() + type.name.slice(1)}
                   </option>
                 ))}
               </select>
