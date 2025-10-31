@@ -11,6 +11,7 @@ import PaginationDemo from "./components/PaginationDemo.tsx";
 import { AlertCircle } from "lucide-react";
 import Hero from "./components/Hero.tsx";
 import AddPokemonForm from "./components/AddPokemonForm.tsx";
+import UpdatePokemonForm from "./components/UpdatePokemonForm.tsx";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -94,6 +95,8 @@ const App: React.FC = () => {
   );
   const [customPokemon, setCustomPokemon] = useState<DataType[]>([]);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+  const [pokemonToEdit, setPokemonToEdit] = useState<DataType | null>(null);
 
   // Ref for scrolling to pokedex section
   const pokedexRef = useRef<HTMLDivElement>(null);
@@ -541,6 +544,92 @@ const App: React.FC = () => {
         </div>
       )}
 
+      {isEditFormOpen && pokemonToEdit && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-8 rounded-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold">Edit Pokemon</h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setIsEditFormOpen(false);
+                  setPokemonToEdit(null);
+                }}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            </div>
+            <UpdatePokemonForm
+              pokemon={pokemonToEdit}
+              onSubmit={async (updatedPokemon) => {
+                try {
+                  // Transform to server format
+                  const serverData = {
+                    id: updatedPokemon.id,
+                    name: updatedPokemon.name,
+                    imageUrl: updatedPokemon.sprites.front_default,
+                    type: updatedPokemon.types[0].type.name,
+                    stats: {
+                      hp: updatedPokemon.stats[0].base_stat,
+                      attack: updatedPokemon.stats[1].base_stat,
+                      defense: updatedPokemon.stats[2].base_stat,
+                      specialAttack: updatedPokemon.stats[3].base_stat,
+                      specialDefense: updatedPokemon.stats[4].base_stat,
+                      speed: updatedPokemon.stats[5].base_stat,
+                    },
+                    description:
+                      updatedPokemon.speciesData?.flavor_text_entries[0]
+                        ?.flavor_text || "",
+                    evolvesFrom:
+                      updatedPokemon.speciesData?.evolves_from_species?.name ||
+                      "",
+                  };
+
+                  const response = await axios.put(
+                    `http://localhost:5000/api/pokemon/custom/${updatedPokemon.id}`,
+                    serverData
+                  );
+
+                  if (response.status === 200) {
+                    setCustomPokemon((prev) =>
+                      prev.map((p) =>
+                        p.id === updatedPokemon.id ? updatedPokemon : p
+                      )
+                    );
+                    setIsEditFormOpen(false);
+                    setPokemonToEdit(null);
+                    handleCloseDetails();
+                    alert("Pokemon updated successfully");
+                  }
+                } catch (error: unknown) {
+                  if (axios.isAxiosError(error)) {
+                    console.error("Failed to update Pokemon:", error);
+                    alert(
+                      `Failed to update Pokemon: ${
+                        error.response?.data?.message ||
+                        error.message ||
+                        "Unknown error"
+                      }`
+                    );
+                  } else if (error instanceof Error) {
+                    console.error("Failed to update Pokemon:", error.message);
+                    alert(`Failed to update Pokemon: ${error.message}`);
+                  } else {
+                    console.error("An unknown error occurred:", error);
+                    alert("Failed to update Pokemon: Unknown error occurred");
+                  }
+                }
+              }}
+              onCancel={() => {
+                setIsEditFormOpen(false);
+                setPokemonToEdit(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       <Button
         onClick={scrollToTop}
         className="fixed bottom-0 right-0 m-6"
@@ -559,25 +648,37 @@ const App: React.FC = () => {
               </Button>
 
               {selectedPokemon.id >= 1001 && (
-                <Button
-                  onClick={() => {
-                    console.log(
-                      "Attempting to delete Pokemon with ID:",
-                      selectedPokemon.id
-                    ); // Debug log
-                    if (
-                      window.confirm(
-                        "Are you sure you want to delete this Pokemon?"
-                      )
-                    ) {
-                      handleDeletePokemon(selectedPokemon.id);
-                    }
-                  }}
-                  variant="destructive"
-                  className="bg-red-600 hover:bg-red-700"
-                >
-                  Delete
-                </Button>
+                <>
+                  <Button
+                    onClick={() => {
+                      setPokemonToEdit(selectedPokemon);
+                      setIsEditFormOpen(true);
+                    }}
+                    variant="secondary"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      console.log(
+                        "Attempting to delete Pokemon with ID:",
+                        selectedPokemon.id
+                      );
+                      if (
+                        window.confirm(
+                          "Are you sure you want to delete this Pokemon?"
+                        )
+                      ) {
+                        handleDeletePokemon(selectedPokemon.id);
+                      }
+                    }}
+                    variant="destructive"
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    Delete
+                  </Button>
+                </>
               )}
             </div>
             <PokemonDetails data={selectedPokemon} />

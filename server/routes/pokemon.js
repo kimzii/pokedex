@@ -78,4 +78,57 @@ router.delete("/custom/:id", async (req, res) => {
   }
 });
 
+// Update a custom Pokemon
+router.put("/custom/:id", async (req, res) => {
+  try {
+    const pokemonId = Number(req.params.id);
+    console.log("Updating Pokemon:", pokemonId);
+    console.log("Received data:", req.body);
+
+    const { name, imageUrl, type, stats, description, evolvesFrom } = req.body;
+
+    // Validate required fields
+    if (!name || !imageUrl || !type || !stats) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+      });
+    }
+
+    const updatedPokemon = await Pokemon.findOneAndUpdate(
+      { id: pokemonId },
+      {
+        name,
+        imageUrl,
+        type,
+        stats,
+        description,
+        evolvesFrom,
+      },
+      { new: true }
+    );
+
+    if (!updatedPokemon) {
+      return res.status(404).json({
+        success: false,
+        message: `Pokemon with id ${pokemonId} not found`,
+      });
+    }
+
+    console.log("Successfully updated Pokemon:", updatedPokemon);
+    res.status(200).json({
+      success: true,
+      message: "Pokemon updated successfully",
+      data: updatedPokemon,
+    });
+  } catch (error) {
+    console.error("Update error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update Pokemon",
+      error: error.message,
+    });
+  }
+});
+
 export default router;

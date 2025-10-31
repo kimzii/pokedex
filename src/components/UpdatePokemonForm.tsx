@@ -1,43 +1,50 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DataType } from "../types/pokemon";
 import axios from "axios";
-import { CustomPokemon } from "../types/pokemon";
 
-interface AddPokemonFormProps {
-  onSubmit: (pokemon: CustomPokemon) => void;
+const pokemonTypes = [
+  "normal",
+  "fire",
+  "water",
+  "electric",
+  "grass",
+  "ice",
+  "fighting",
+  "poison",
+  "ground",
+  "flying",
+  "psychic",
+  "bug",
+  "rock",
+  "ghost",
+  "dragon",
+  "dark",
+  "steel",
+  "fairy",
+];
+
+interface UpdatePokemonFormProps {
+  pokemon: DataType;
+  onSubmit: (updatedPokemon: DataType) => void;
   onCancel: () => void;
 }
 
-const AddPokemonForm: React.FC<AddPokemonFormProps> = ({
+const UpdatePokemonForm: React.FC<UpdatePokemonFormProps> = ({
+  pokemon,
   onSubmit,
   onCancel,
 }) => {
   const [formData, setFormData] = useState({
-    name: "",
+    name: pokemon.name,
     sprites: {
-      front_default: "",
+      front_default: pokemon.sprites.front_default,
     },
-    types: [
-      {
-        type: {
-          name: "normal",
-          url: "https://pokeapi.co/api/v2/type/1",
-        },
-      },
-    ],
-    stats: [
-      { base_stat: "45", stat: { name: "hp" } },
-      { base_stat: "45", stat: { name: "attack" } },
-      { base_stat: "45", stat: { name: "defense" } },
-      { base_stat: "45", stat: { name: "special-attack" } },
-      { base_stat: "45", stat: { name: "special-defense" } },
-      { base_stat: "45", stat: { name: "speed" } },
-    ],
-    speciesData: {
-      evolves_from_species: {
-        name: "",
-      },
+    types: pokemon.types,
+    stats: pokemon.stats,
+    speciesData: pokemon.speciesData || {
+      evolves_from_species: { name: "" },
       flavor_text_entries: [
         {
           flavor_text: "",
@@ -50,42 +57,14 @@ const AddPokemonForm: React.FC<AddPokemonFormProps> = ({
     },
   });
 
-  // Update the pokemonTypes array with type IDs
-  const pokemonTypes = [
-    { name: "normal", id: 1 },
-    { name: "fighting", id: 2 },
-    { name: "flying", id: 3 },
-    { name: "poison", id: 4 },
-    { name: "ground", id: 5 },
-    { name: "rock", id: 6 },
-    { name: "bug", id: 7 },
-    { name: "ghost", id: 8 },
-    { name: "steel", id: 9 },
-    { name: "fire", id: 10 },
-    { name: "water", id: 11 },
-    { name: "grass", id: 12 },
-    { name: "electric", id: 13 },
-    { name: "psychic", id: 14 },
-    { name: "ice", id: 15 },
-    { name: "dragon", id: 16 },
-    { name: "dark", id: 17 },
-    { name: "fairy", id: 18 },
-  ];
-
-  // Update the handleSubmit function
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      // Get the selected type from form state
-      const selectedType = pokemonTypes.find(
-        (t) => t.name === formData.types[0].type.name
-      );
-
-      const pokemonData = {
-        name: formData.name.trim(),
-        imageUrl: formData.sprites.front_default.trim(),
-        // Send type as a simple string instead of an array
+      const customPokemonData = {
+        id: pokemon.id,
+        name: formData.name,
+        imageUrl: formData.sprites.front_default,
         type: formData.types[0].type.name,
         stats: {
           hp: formData.stats[0].base_stat,
@@ -100,27 +79,60 @@ const AddPokemonForm: React.FC<AddPokemonFormProps> = ({
         evolvesFrom: formData.speciesData?.evolves_from_species?.name || "",
       };
 
-      console.log("Selected type:", selectedType?.name); // Debug log
-      console.log("Type being sent:", formData.types[0].type.name); // Debug log
+      console.log("Updating Pokemon with ID:", pokemon.id);
+      console.log("Sending data:", customPokemonData);
 
-      const response = await axios.post(
-        "http://localhost:5000/api/pokemon/custom",
-        pokemonData
+      const response = await axios.put(
+        `http://localhost:5000/api/pokemon/custom/${pokemon.id}`,
+        customPokemonData
       );
 
-      if (response.status === 201) {
-        console.log("Pokemon saved:", response.data);
-        onSubmit(response.data);
-        // Reset form while keeping the current type
-        setFormData((prev) => ({
-          ...prev,
-          name: "",
-          sprites: { front_default: "" },
+      console.log("Server response:", response.data); // Add this log
+
+      if (response.status === 200 && response.data.success) {
+        // Transform response data
+        const updatedPokemon: DataType = {
+          id: pokemon.id,
+          name: response.data.data.name,
+          sprites: {
+            front_default: response.data.data.imageUrl,
+          },
+          types: [
+            {
+              type: {
+                name: response.data.data.type,
+                url: `https://pokeapi.co/api/v2/type/${response.data.data.type}`,
+              },
+            },
+          ],
+          stats: [
+            { base_stat: response.data.data.stats.hp, stat: { name: "hp" } },
+            {
+              base_stat: response.data.data.stats.attack,
+              stat: { name: "attack" },
+            },
+            {
+              base_stat: response.data.data.stats.defense,
+              stat: { name: "defense" },
+            },
+            {
+              base_stat: response.data.data.stats.specialAttack,
+              stat: { name: "special-attack" },
+            },
+            {
+              base_stat: response.data.data.stats.specialDefense,
+              stat: { name: "special-defense" },
+            },
+            {
+              base_stat: response.data.data.stats.speed,
+              stat: { name: "speed" },
+            },
+          ],
           speciesData: {
-            evolves_from_species: { name: "" },
+            evolves_from_species: { name: response.data.data.evolvesFrom },
             flavor_text_entries: [
               {
-                flavor_text: "",
+                flavor_text: response.data.data.description,
                 language: {
                   name: "en",
                   url: "https://pokeapi.co/api/v2/language/9/",
@@ -128,12 +140,28 @@ const AddPokemonForm: React.FC<AddPokemonFormProps> = ({
               },
             ],
           },
-        }));
+        };
+
+        onSubmit(updatedPokemon);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        console.error("Full error:", error.response?.data); // More detailed error logging
-        alert("Failed to save Pokemon. Please try again.");
+        console.error("Update failed:", {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message,
+        });
+        alert(
+          `Failed to update Pokemon: ${
+            error.response?.data?.message || error.message
+          }`
+        );
+      } else if (error instanceof Error) {
+        console.error("Update failed:", error.message);
+        alert(`Failed to update Pokemon: ${error.message}`);
+      } else {
+        console.error("An unknown error occurred:", error);
+        alert("Failed to update Pokemon: Unknown error occurred");
       }
     }
   };
@@ -149,21 +177,19 @@ const AddPokemonForm: React.FC<AddPokemonFormProps> = ({
                 Pokemon Name
               </label>
               <Input
-                type="text"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-                placeholder="Enter Pokemon name"
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium mb-1">
-                Sprite URL
+                Image URL
               </label>
               <Input
-                type="url"
                 value={formData.sprites.front_default}
                 onChange={(e) =>
                   setFormData({
@@ -175,40 +201,38 @@ const AddPokemonForm: React.FC<AddPokemonFormProps> = ({
                   })
                 }
                 required
-                placeholder="Enter sprite URL"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium mb-1">Type</label>
-              <select
-                value={formData.types[0].type.name}
-                onChange={(e) => {
-                  const selectedType = pokemonTypes.find(
-                    (t) => t.name === e.target.value
-                  );
-                  setFormData({
-                    ...formData,
-                    types: [
-                      {
-                        type: {
-                          name: e.target.value,
-                          url: `https://pokeapi.co/api/v2/type/${
-                            selectedType?.id || 1
-                          }`,
+              <div>
+                <label className="block text-sm font-medium mb-1">Type</label>
+                <select
+                  value={formData.types[0].type.name}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      types: [
+                        {
+                          type: {
+                            name: e.target.value,
+                            url: `https://pokeapi.co/api/v2/type/${e.target.value}`,
+                          },
                         },
-                      },
-                    ],
-                  });
-                }}
-                className="w-full rounded-md border border-input bg-background px-3 py-2"
-                required
-              >
-                {pokemonTypes.map((type) => (
-                  <option key={type.name} value={type.name}>
-                    {type.name.charAt(0).toUpperCase() + type.name.slice(1)}
-                  </option>
-                ))}
-              </select>
+                      ],
+                    })
+                  }
+                  className="w-full rounded-md border border-input bg-background px-3 py-2"
+                  required
+                >
+                  <option value="">Select type</option>
+                  {pokemonTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div>
@@ -234,28 +258,6 @@ const AddPokemonForm: React.FC<AddPokemonFormProps> = ({
                 className="w-full rounded-md border border-input bg-background px-3 py-2"
                 required
                 rows={3}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Evolves From
-              </label>
-              <Input
-                type="text"
-                value={formData.speciesData.evolves_from_species.name}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    speciesData: {
-                      ...formData.speciesData,
-                      evolves_from_species: {
-                        name: e.target.value,
-                      },
-                    },
-                  })
-                }
-                placeholder="Enter evolution source (optional)"
               />
             </div>
           </section>
@@ -296,16 +298,15 @@ const AddPokemonForm: React.FC<AddPokemonFormProps> = ({
           </section>
         </div>
 
-        {/* Form Actions */}
-        <div className="flex gap-2 justify-end mt-6">
+        <div className="flex justify-end gap-2 mt-6">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit">Add Pokemon</Button>
+          <Button type="submit">Update Pokemon</Button>
         </div>
       </form>
     </div>
   );
 };
 
-export default AddPokemonForm;
+export default UpdatePokemonForm;
